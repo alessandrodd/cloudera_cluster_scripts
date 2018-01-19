@@ -6,6 +6,7 @@ user=""
 verbose=0
 should_clean_hdfs=false
 should_clean_hive=false
+should_clean_sqoop=false
 
 SQOOP_CLEANING_LIMIT_DAYS=3
 SQOOP_TMP_DIR="/tmp"
@@ -27,10 +28,10 @@ check_if_command_exists() {
 }
 
 check_if_path_exists() {
-	if ls "$1" 1>/dev/null 2>&1; then
+    if ls $1 &> /dev/null; then
 		echo true
 	else
-		echo echo false
+		echo false
 	fi
 }
 
@@ -93,7 +94,7 @@ clean_hdfs() {
 
 run_sqoop_delete() {
 	if "$(check_if_path_exists "$SQOOP_TMP_DIR/sqoop-$1")"; then
-		$(find "$SQOOP_TMP_DIR/sqoop-$1 -type f -mtime +$SQOOP_CLEANING_LIMIT_DAYS -print -delete")
+		echo $(find "$SQOOP_TMP_DIR/sqoop-$1" -type f -mtime +$SQOOP_CLEANING_LIMIT_DAYS -print -delete)
 	else
 		error "Sqoop temp directory not found for user $1 (Directory $SQOOP_TMP_DIR/sqoop-$1 not found)"
 	fi
@@ -104,8 +105,10 @@ clean_sqoop() {
 	if [ -z "$user" ]; then
 		if "$(check_if_path_exists "$SQOOP_TMP_DIR/sqoop-*")"; then
 			for f in $SQOOP_TMP_DIR/sqoop-*; do
-				username = ${f#$SQOOP_TMP_DIR/sqoop-}
-				run_sqoop_delete $username
+                if [[ -d $f ]]; then
+				    username=${f#$SQOOP_TMP_DIR/sqoop-}
+				    run_sqoop_delete $username
+                fi
 			done
 		else
 			error "Directory $SQOOP_TMP_DIR/sqoop-* not found; does this machine hosts a Sqoop gateway?"
@@ -127,18 +130,18 @@ show_help() {
 	echo "Cloudera cluster cleaning utility"
 	echo "Usage: $0 [--hive] [--hdfs] [-hv] [--user=USER1,USER2,...]"
 	echo ""
-	echo "    --hdfs      cleans the HDFS trash, removing all checkpoints older than"
-	echo "                fs.trash.interval parameter"
-	echo "    --hive      clean Hive scratch directory; removes dangling temp files"
-	echo "                warning: hive.scratchdir.lock should be set to true to"
-	echo "                avoid corrupting running jobs"
-	echo "    --sqoop     clean sqoop tmp directory, removing all temp files older"
-	echo "                than $SQOOP_CLEANING_LIMIT_DAYS days"
-	echo "    -h          display this help and exit"
-	echo "    -v          verbose mode; can be used multiple times for increased"
-	echo "                verbosity"
-	echo "    --user      execute the operation for the specified user[s]. If not"
-	echo "                specified, then it will be executed for all users"
+	echo "    --hdfs                 cleans the HDFS trash, removing all checkpoints older than"
+	echo "                           fs.trash.interval parameter"
+	echo "    --hive                 clean Hive scratch directory; removes dangling temp files"
+	echo "                           warning: hive.scratchdir.lock should be set to true to"
+	echo "                           avoid corrupting running jobs"
+	echo "    --sqoop                clean sqoop GATEWAY tmp directory, removing all temp files older"
+	echo "                           than $SQOOP_CLEANING_LIMIT_DAYS days"
+	echo "    -h                     display this help and exit"
+	echo "    -v                     verbose mode; can be used multiple times for increased"
+	echo "                           verbosity"
+	echo "    --user=USR1,USR2       execute the operation for the specified user[s]. If not"
+	echo "                           specified, then it will be executed for all users"
 }
 
 if [ $# -eq 0 ]; then
