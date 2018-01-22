@@ -128,7 +128,7 @@ die() {
 # Usage info
 show_help() {
 	echo "Cloudera cluster cleaning utility"
-	echo "Usage: $0 [--hive] [--hdfs] [-hv] [--user=USER1,USER2,...]"
+	echo "Usage: $0 [--hive] [--hdfs] [--sqoop] [-h] [-v] [--user=USER1,USER2,...]"
 	echo ""
 	echo "    --hdfs                 cleans the HDFS trash, removing all checkpoints older than"
 	echo "                           fs.trash.interval parameter"
