@@ -25,39 +25,32 @@ def execute_script(script_name, args):
     if debug_mode:
         print(" ".join(map(str, cmd)))
         return
-    p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
+    p = Popen(cmd, shell=False, stdin=PIPE, stdout=PIPE,
               stderr=STDOUT, close_fds=True)
     output = p.stdout.read()
     print(output)
-    err_output = p.stderr.read()
-    print(err_output, file=sys.stderr)
 
 
 def execute_cleaning(cluster_name, cluster_version, service_type, role_type, is_leader):
-    if role_type == "GATEWAY" and service_type == "HDFS":
-        logging.info("Host has role {0} for service {1} in cluster '{2}'".format(
-            role_type, service_type, cluster_name))
+    if role_type == "NAMENODE" and service_type == "HDFS":
         if is_leader:
+            logging.info("Host is leader, running {0} cleaning.".format(role_type))
             execute_script("cloudera_cleaner_script.sh", ["--hdfs"])
         else:
-            logging.info(
-                "Not running HDFS cleaning because this host is not the leader.")
+            logging.info("Not running {0} cleaning because this host is not the leader.".format(role_type))
     elif role_type == "GATEWAY" and service_type == "HIVE":
-        logging.info("Host has role {0} for service {1} in cluster '{2}'".format(
-            role_type, service_type, cluster_name))
         if is_leader:
             if cluster_version < "5.8.4":
                 logging.info(
                     "Running 'naive' cleaning script because CDH version is < 5.8.4")
                 execute_script("hive_cleaning_script.sh", ["7"])
             else:
+                logging.info("Host is leader, running {0} cleaning.".format(role_type))
                 execute_script("cloudera_cleaner_script.sh", ["--hive"])
         else:
-            logging.info(
-                "Not running HDFS cleaning because this host is not the leader.")
+            logging.info("Not running {0} cleaning because this host is not the leader.".format(role_type))
     elif role_type == "GATEWAY" and service_type == "SQOOP_CLIENT":
-        logging.info("Host has role {0} for service {1} in cluster '{2}'".format(
-            role_type, service_type, cluster_name))
+        logging.info("Running {0} cleaning.".format(role_type))
         execute_script("cloudera_cleaner_script.sh", ["--sqoop"])
 
 
@@ -66,6 +59,7 @@ def is_role_leader(service, role_type, role_name):
     Given the complete list of roles for a particular service, the leader
     for a role type is simply the role instance whose role name is the 
     first alfabetically among all roles with the same role type."""
+    logging.debug("Role name: {0}".format(role_name))
     for role in service.get_all_roles():
         if role.type and role.type == role_type and role.name < role_name:
             logging.debug("Role Leader for service {0} roletype {1} is {2}".format(
@@ -83,10 +77,17 @@ def clean_host(cm_api):
         if host.hostname == my_hostname:
             role_refs = host.roleRefs
             for ref in role_refs:
-                cluster_name = ref.clusterName
-                cluster = cm_api.get_cluster(cluster_name)
-                cluster_version = cluster.fullVersion
-                service = cluster.get_service(ref.serviceName)
+                if hasattr(ref, "clusterName") and ref.clusterName is not None:
+                    cluster_name = ref.clusterName
+                    cluster = cm_api.get_cluster(cluster_name)
+                    cluster_version = cluster.fullVersion
+                    service = cluster.get_service(ref.serviceName)
+                else:
+                    # if there is no cluster name, than we are looking at Cloudera MGMT service 
+                    cluster_name = None
+                    cluster_version = None
+                    cm = cm_api.get_cloudera_manager()
+                    service = cm.get_service()
                 service_type = service.type
                 role = service.get_role(ref.roleName)
                 role_type = role.type
