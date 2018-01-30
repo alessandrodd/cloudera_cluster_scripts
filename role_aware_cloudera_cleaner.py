@@ -122,7 +122,7 @@ def main():
 
     # parse the configuration file
     config = ConfigParser.ConfigParser()
-    config.read("config.ini")
+    config.read(os.path.join(script_path,"config.ini"))
     cm_host = config.get("Main", "cm_host")
     cm_port = config.get("Main", "cm_port")
     cm_user = config.get("Main", "cm_user")
