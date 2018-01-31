@@ -37,7 +37,7 @@ check_if_path_exists() {
 
 run_cleardanglingscratchdir() {
 	log "cleaning Hive dangling scratch directory"
-	HADOOP_USER_NAME=hive hive --service cleardanglingscratchdir
+	HADOOP_USER_NAME=hdfs hive --service cleardanglingscratchdir
 	if [ "$verbose" -gt "0" ]; then
 		log "Return Code: " "$?"
 	fi
