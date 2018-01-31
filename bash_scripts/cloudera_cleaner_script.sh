@@ -104,7 +104,7 @@ clean_sqoop() {
                 fi
 			done
 		else
-			warn "Directory $SQOOP_TMP_DIR/sqoop-* not found; does this machine hosts a Sqoop gateway?"
+			warn "Directory $SQOOP_TMP_DIR/sqoop-* not found; does this machine host a Sqoop Gateway?"
 		fi
 	else
 		for username in $(echo $user | sed "s/,/ /g"); do
