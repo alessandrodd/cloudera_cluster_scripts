@@ -34,23 +34,23 @@ def execute_script(script_name, args):
 def execute_cleaning(cluster_name, cluster_version, service_type, role_type, is_leader):
     if role_type == "NAMENODE" and service_type == "HDFS":
         if is_leader:
-            logging.info("Host is leader, running {0} cleaning.".format(role_type))
+            logging.info("Host is leader, running {0} {1} cleaning.".format(service_type, role_type))
             execute_script("cloudera_cleaner_script.sh", ["--hdfs"])
         else:
-            logging.info("Not running {0} cleaning because this host is not the leader.".format(role_type))
+            logging.info("Not running {0} {1} cleaning because this host is not the leader.".format(service_type, role_type))
     elif role_type == "HIVEMETASTORE" and service_type == "HIVE":
         if is_leader:
             if cluster_version < "5.8.4":
                 logging.info(
-                    "Running 'naive' cleaning script because CDH version is < 5.8.4")
+                    "Running 'naive' hive cleaning script because CDH version is < 5.8.4")
                 execute_script("hive_cleaning_script.sh", ["7"])
             else:
-                logging.info("Host is leader, running {0} cleaning.".format(role_type))
+                logging.info("Host is leader, running {0} {1} cleaning.".format(service_type, role_type))
                 execute_script("cloudera_cleaner_script.sh", ["--hive"])
         else:
-            logging.info("Not running {0} cleaning because this host is not the leader.".format(role_type))
+            logging.info("Not running {0} {1} cleaning because this host is not the leader.".format(service_type, role_type))
     elif role_type == "GATEWAY" and service_type == "SQOOP_CLIENT":
-        logging.info("Running {0} cleaning.".format(role_type))
+        logging.info("Running {0} {1} cleaning.".format(service_type, role_type))
         execute_script("cloudera_cleaner_script.sh", ["--sqoop"])
 
 
