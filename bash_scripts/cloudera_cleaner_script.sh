@@ -19,6 +19,10 @@ error() {
 	log "[ERROR] $1" 1>&2
 }
 
+warn() {
+	log "[WARN] $1" 1>&2
+}
+
 check_if_command_exists() {
 	if hash "$1" 2>/dev/null; then
 		echo true
@@ -85,7 +89,7 @@ run_sqoop_delete() {
 	if "$(check_if_path_exists "$SQOOP_TMP_DIR/sqoop-$1")"; then
 		echo $(find "$SQOOP_TMP_DIR/sqoop-$1" -type f -mtime +$SQOOP_CLEANING_LIMIT_DAYS -print -delete)
 	else
-		error "Sqoop temp directory not found for user $1 (Directory $SQOOP_TMP_DIR/sqoop-$1 not found)"
+		warn "Sqoop temp directory not found for user $1 (Directory $SQOOP_TMP_DIR/sqoop-$1 not found)"
 	fi
 }
 
@@ -100,7 +104,7 @@ clean_sqoop() {
                 fi
 			done
 		else
-			error "Directory $SQOOP_TMP_DIR/sqoop-* not found; does this machine hosts a Sqoop gateway?"
+			warn "Directory $SQOOP_TMP_DIR/sqoop-* not found; does this machine hosts a Sqoop gateway?"
 		fi
 	else
 		for username in $(echo $user | sed "s/,/ /g"); do
