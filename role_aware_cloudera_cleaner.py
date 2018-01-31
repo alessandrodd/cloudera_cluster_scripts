@@ -38,7 +38,7 @@ def execute_cleaning(cluster_name, cluster_version, service_type, role_type, is_
             execute_script("cloudera_cleaner_script.sh", ["--hdfs"])
         else:
             logging.info("Not running {0} cleaning because this host is not the leader.".format(role_type))
-    elif role_type == "GATEWAY" and service_type == "HIVE":
+    elif role_type == "HIVEMETASTORE" and service_type == "HIVE":
         if is_leader:
             if cluster_version < "5.8.4":
                 logging.info(
@@ -62,8 +62,6 @@ def is_role_leader(service, role_type, role_name):
     logging.debug("Role name: {0}".format(role_name))
     for role in service.get_all_roles():
         if role.type and role.type == role_type and role.name < role_name:
-            logging.debug("Role Leader for service {0} roletype {1} is {2}".format(
-                service.name, role.type, role.name))
             return False
     return True
 

@@ -36,8 +36,8 @@ check_if_path_exists() {
 }
 
 run_cleardanglingscratchdir() {
-	log "cleaning Hive dangling scratch directory for user $1"
-	HADOOP_USER_NAME=$1 hive --service cleardanglingscratchdir
+	log "cleaning Hive dangling scratch directory"
+	HADOOP_USER_NAME=hive hive --service cleardanglingscratchdir
 	if [ "$verbose" -gt "0" ]; then
 		log "Return Code: " "$?"
 	fi
@@ -45,18 +45,7 @@ run_cleardanglingscratchdir() {
 
 clean_hive() {
 	if "$(check_if_command_exists hive)"; then
-		if [ -z "$user" ]; then
-			# we cannot use the following simpler version because the -C argument was added in CDH 5.8 (see HADOOP-10971)
-			# for filename in `hdfs dfs -ls -C /user | awk '{print $NF}' | tr '\n' ' '`
-			for filename in $(hdfs dfs -ls /user | sed 1d | perl -wlne'print +(split " ",$_,8)[7]' | awk '{print $NF}' | tr '\n' ' '); do
-				username=$(basename $filename)
-				run_cleardanglingscratchdir $username
-			done
-		else
-			for username in $(echo $user | sed "s/,/ /g"); do
-				run_cleardanglingscratchdir $username
-			done
-		fi
+		run_cleardanglingscratchdir
 	else
 		error "hive command not found. Skipping..."
 	fi
