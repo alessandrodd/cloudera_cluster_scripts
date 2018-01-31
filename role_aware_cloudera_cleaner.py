@@ -23,12 +23,12 @@ def execute_script(script_name, args):
     cmd = [full_path]
     cmd = cmd + args
     if debug_mode:
-        print(" ".join(map(str, cmd)))
+        logging.debug(" ".join(map(str, cmd)))
         return
     p = Popen(cmd, shell=False, stdin=PIPE, stdout=PIPE,
               stderr=STDOUT, close_fds=True)
-    output = p.stdout.read()
-    print(output)
+    output = p.communicate()[0]
+    logging.info(output)
 
 
 def execute_cleaning(cluster_name, cluster_version, service_type, role_type, is_leader):
