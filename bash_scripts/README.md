@@ -59,3 +59,24 @@ hive_cleaning_script.sh 3
 ```
 
 Warning: this script is meant to be used in CDH < 5.8.4 or Hive < 1.3.0 . For CDH 5.8.4 and above (or Hive 1.3.0 and above) the cleardanglingscratchdir service or the hive_cleaning_script.sh script should be used (see HIVE-15068).
+
+## impala_cleaning_script.sh
+
+Impala Catalog Server Cleaner Utility
+
+### Usage:  
+```
+impala_cleaning_script.sh [minutes]
+```
+
+Search and deletes jar and crc UDF files older than [minutes] minutes. If a Catalog Server is using it, than it could fail or crash. Temp directory is defined by _JAVA_OPTIONS environment variable, e.g. export _JAVA_OPTIONS="$_JAVA_OPTIONS -Djava.io.tmpdir=/tmp" (default /tmp)
+
+### Example:
+
+#### Delete Impala UDF files older than 1 day
+
+```
+impala_cleaning_script.sh 1440
+```
+
+Warning: this script is meant to be used in CDH < 5.9.2 or Impala < 2.8.0. In CDH 5.9.2 and above (or Impala 2.8.0 and above) this should not be necessary (see IMPALA-3983 and IMPALA-3983)."

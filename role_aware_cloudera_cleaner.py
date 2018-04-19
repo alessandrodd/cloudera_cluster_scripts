@@ -53,6 +53,10 @@ def execute_cleaning(cluster_name, cluster_version, service_type, role_type, is_
     elif role_type == "GATEWAY" and service_type == "SQOOP_CLIENT":
         logging.info("Running {0} {1} cleaning.".format(service_type, role_type))
         execute_script("cloudera_cleaner_script.sh", ["--sqoop"])
+    elif role_type == "CATALOGSERVER" and service_type == "IMPALA":
+        if StrictVersion(cluster_version) < StrictVersion("5.9.2"):
+            logging.info("Running {0} {1} cleaning.".format(service_type, role_type))
+            execute_script("impala_cleaning_script.sh", ["60"])
 
 
 def is_role_leader(service, role_type, role_name):
