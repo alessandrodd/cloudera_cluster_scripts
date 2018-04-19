@@ -7,6 +7,7 @@ import argparse
 import logging
 import socket
 import ConfigParser
+from distutils.version import StrictVersion
 from subprocess import Popen, PIPE, STDOUT
 from cm_api.api_client import ApiResource
 
@@ -40,7 +41,7 @@ def execute_cleaning(cluster_name, cluster_version, service_type, role_type, is_
             logging.info("Not running {0} {1} cleaning because this host is not the leader.".format(service_type, role_type))
     elif role_type == "HIVEMETASTORE" and service_type == "HIVE":
         if is_leader:
-            if cluster_version < "5.8.4":
+            if StrictVersion(cluster_version) < StrictVersion("5.8.4"):
                 logging.info(
                     "Running 'naive' hive cleaning script because CDH version is < 5.8.4")
                 execute_script("hive_cleaning_script.sh", ["7"])
