@@ -48,7 +48,7 @@ echo 0 > $TEMPFILE
 # check if we are using a global custom java.io.tmpdir dir
 JAVA_IO_TMPDIR="$(echo $_JAVA_OPTIONS | grep -Po 'java.io.tmpdir=\K[^ ]+' | tail -1)"
 if [[ -z "${JAVA_IO_TMPDIR// }" ]]; then
-    JAVA_IO_TMPDIR=JAVA_IO_TMPDIR_DEFAULT
+    JAVA_IO_TMPDIR=$JAVA_IO_TMPDIR_DEFAULT
 fi
 if cd ${JAVA_IO_TMPDIR}; then
     for file in $(find . -regextype posix-extended -regex './(\.){0,1}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jar(\.crc){0,1}' -user impala -mmin +$1); do 
