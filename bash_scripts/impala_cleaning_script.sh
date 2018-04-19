@@ -53,7 +53,7 @@ fi
 if cd ${JAVA_IO_TMPDIR}; then
     for file in $(find . -regextype posix-extended -regex './(\.){0,1}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jar(\.crc){0,1}' -user impala -mmin +$1); do 
         echo $file
-        #rm $file
+        rm $file
         COUNTER=$(($(cat $TEMPFILE) + 1))
         echo $COUNTER > $TEMPFILE
     done
